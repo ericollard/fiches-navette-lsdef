@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fiches navette UE</title>
+<style>
+  :root{
+    --encre:#1f4e5f; --accent:#006d82; --texte:#1f3a47; --gris:#5a6b74;
+    --ambre:#fff2cc; --ambre-bord:#e6c86b; --fond:#f4f6f7; --blanc:#fff;
+    --bord:#d4dde1; --vert:#1e6b4f; --rouge:#9b2c2c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Calibri,Arial,sans-serif;
+       color:var(--texte);background:var(--fond)}
+  header{background:var(--encre);color:#fff;padding:26px 16px}
+  .centre{max-width:900px;margin:0 auto}
+  header h1{margin:0;font-size:1.55rem;font-weight:600;letter-spacing:.2px}
+  header p{margin:6px 0 0;opacity:.88;font-size:.95rem}
+  main{padding:0 16px 64px}
+  section{background:var(--blanc);border:1px solid var(--bord);border-radius:6px;
+          padding:20px 22px;margin:22px 0}
+  h2{margin:0 0 4px;font-size:1.08rem;color:var(--encre)}
+  h2 .num{display:inline-block;width:1.6em;height:1.6em;line-height:1.6em;text-align:center;
+          background:var(--accent);color:#fff;border-radius:50%;font-size:.78rem;
+          margin-right:8px;vertical-align:1px}
+  .aide{color:var(--gris);font-size:.9rem;margin:0 0 14px}
+  .depot{border:2px dashed var(--bord);border-radius:6px;padding:22px;text-align:center;
+         background:#fafcfc;transition:border-color .15s,background .15s;cursor:pointer}
+  .depot:hover,.depot.survol{border-color:var(--accent);background:#f0f8fa}
+  .depot strong{color:var(--encre)}
+  .depot span{display:block;color:var(--gris);font-size:.88rem;margin-top:4px}
+  input[type=file]{display:none}
+  button{font:inherit;font-weight:600;border:0;border-radius:5px;padding:11px 20px;
+         background:var(--accent);color:#fff;cursor:pointer}
+  button:hover{background:#005a6c}
+  button:disabled{background:#b9c6cb;cursor:not-allowed}
+  button.second{background:#fff;color:var(--accent);border:1px solid var(--accent)}
+  button.second:hover{background:#f0f8fa}
+  .etat{margin-top:12px;font-size:.93rem}
+  .ok{color:var(--vert)} .err{color:var(--rouge)}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;margin-top:10px}
+  th,td{border:1px solid var(--bord);padding:6px 9px;text-align:left;vertical-align:top}
+  th{background:#eef3f5;color:var(--encre);font-weight:600}
+  td.n{text-align:right;white-space:nowrap}
+  .grille{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+  .carte{border:1px solid var(--bord);border-radius:5px;padding:10px 12px;background:#fafcfc}
+  .carte b{display:block;font-size:1.5rem;color:var(--encre);line-height:1.2}
+  .carte span{font-size:.82rem;color:var(--gris)}
+  .barre{height:9px;background:#e4ebee;border-radius:5px;overflow:hidden;margin-top:12px}
+  .barre i{display:block;height:100%;width:0;background:var(--accent);transition:width .12s}
+  .avis{background:var(--ambre);border-left:4px solid var(--ambre-bord);padding:12px 14px;
+        border-radius:4px;font-size:.92rem;margin-top:14px}
+  .avis p{margin:0 0 6px} .avis p:last-child{margin:0}
+  ul.fiches{list-style:none;padding:0;margin:12px 0 0;max-height:320px;overflow:auto;
+            border:1px solid var(--bord);border-radius:5px}
+  ul.fiches li{display:flex;align-items:center;gap:10px;padding:7px 11px;border-bottom:1px solid #eef2f4;
+               font-size:.9rem}
+  ul.fiches li:last-child{border-bottom:0}
+  ul.fiches code{color:var(--encre);font-weight:600;min-width:62px}
+  ul.fiches .lib{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  ul.fiches a{color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap}
+  ul.fiches a:hover{text-decoration:underline}
+  .cache{display:none}
+  .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
+  footer{color:var(--gris);font-size:.84rem;text-align:center;padding:0 16px 40px}
+  footer a{color:var(--accent)}
+  @media (max-width:560px){section{padding:16px}header h1{font-size:1.25rem}
+    .grille{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<header><div class="centre">
+  <h1>Générateur de fiches navette UE</h1>
+  <p>Licence Sciences de l'éducation et de la formation, nouvelle offre de formation 2027.</p>
+</div></header>
+
+<main class="centre">
+
+  <section>
+    <h2><span class="num">1</span>Choisir le classeur de base</h2>
+    <p class="aide">Le classeur reste sur votre ordinateur. Il n'est ni transmis, ni enregistré sur
+      le serveur : la page produit les fiches dans votre navigateur, hors ligne si besoin.</p>
+    <div class="depot" id="depotBase">
+      <strong>Déposez ici le classeur de base</strong>
+      <span>ou cliquez pour le choisir. Fichier .xlsx, son nom n'a pas d'importance.</span>
+    </div>
+    <input type="file" id="fichierBase" accept=".xlsx,.xlsm">
+    <p class="etat" id="etatBase"></p>
+  </section>
+
+  <section id="blocResume" class="cache">
+    <h2><span class="num">2</span>Vérifier ce que contient la base</h2>
+    <p class="aide">Ces nombres sont lus dans le classeur que vous venez de choisir.
+      Ils vous permettent de vérifier que c'est bien la version attendue avant de produire les fiches.</p>
+    <div class="grille" id="cartes"></div>
+    <div id="tableaux"></div>
+    <div class="avis" id="avertissements"></div>
+  </section>
+
+  <section id="blocProduire" class="cache">
+    <h2><span class="num">3</span>Produire les fiches</h2>
+    <p class="aide">Le modèle de fiche est fourni avec la page. Si votre comité en adopte une
+      nouvelle version, vous pouvez la substituer ci-dessous.</p>
+    <div class="actions">
+      <button id="btnTout">Produire les 0 fiches</button>
+      <button class="second" id="btnModele">Utiliser un autre modèle</button>
+      <input type="file" id="fichierModele" accept=".docx">
+      <span class="etat" id="etatModele"></span>
+    </div>
+    <div class="barre"><i id="jauge"></i></div>
+    <p class="etat" id="etatProd"></p>
+    <ul class="fiches cache" id="listeFiches"></ul>
+    <div class="actions" id="actionsZip" style="display:none">
+      <button id="btnZip">Télécharger l'ensemble, archive .zip</button>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">?</span>En cas de difficulté</h2>
+    <p class="aide" style="margin:0">Si un message d'erreur nomme une clé de texte ou une feuille,
+      la correction se fait dans le classeur et non dans la page : rien de ce qui s'écrit dans les
+      fiches ne figure dans le programme. Les phrases fixes sont dans la feuille
+      <b>Ref_Textes</b>, la correspondance des régimes d'évaluation dans <b>Ref_Gabarit_fiche</b>.</p>
+  </section>
+
+</main>
+
+<footer class="centre">
+  <p>Traitement entièrement local. Aucune donnée ne quitte votre navigateur.</p>
+</footer>
+
+<script src="vendor/jszip.min.js"></script>
+<script src="vendor/xlsx.full.min.js"></script>
+<script src="generateur.js"></script>
+<script>
+(function () {
+  'use strict';
+  var CHEMIN_MODELE = 'modele/Fiche_navette_modele_balise.docx';
+  var classeur = null, base = null, modeleBuf = null, produites = [];
+
+  function $(id) { return document.getElementById(id); }
+  function v(x) { return (x === null || x === undefined) ? '' : String(x).trim(); }
+  function etat(el, txt, classe) {
+    el.textContent = txt;
+    el.className = 'etat' + (classe ? ' ' + classe : '');
+  }
+
+  /* ------------------------------------------------- le modèle fourni */
+  fetch(CHEMIN_MODELE).then(function (r) {
+    if (!r.ok) throw new Error('réponse ' + r.status);
+    return r.arrayBuffer();
+  }).then(function (buf) {
+    modeleBuf = buf;
+    etat($('etatModele'), 'Modèle fourni avec la page.', 'ok');
+  }).catch(function () {
+    etat($('etatModele'), "Le modèle fourni n'a pas pu être chargé. Choisissez-en un.", 'err');
+  });
+
+  $('btnModele').addEventListener('click', function () { $('fichierModele').click(); });
+  $('fichierModele').addEventListener('change', function (e) {
+    var f = e.target.files[0];
+    if (!f) return;
+    f.arrayBuffer().then(function (buf) {
+      modeleBuf = buf;
+      etat($('etatModele'), 'Modèle : ' + f.name, 'ok');
+    });
+  });
+
+  /* ------------------------------------------------- choix de la base */
+  var depot = $('depotBase');
+  depot.addEventListener('click', function () { $('fichierBase').click(); });
+  ['dragenter', 'dragover'].forEach(function (t) {
+    depot.addEventListener(t, function (e) { e.preventDefault(); depot.classList.add('survol'); });
+  });
+  ['dragleave', 'drop'].forEach(function (t) {
+    depot.addEventListener(t, function (e) { e.preventDefault(); depot.classList.remove('survol'); });
+  });
+  depot.addEventListener('drop', function (e) {
+    if (e.dataTransfer.files.length) lireFichier(e.dataTransfer.files[0]);
+  });
+  $('fichierBase').addEventListener('change', function (e) {
+    if (e.target.files.length) lireFichier(e.target.files[0]);
+  });
+
+  function lireFichier(f) {
+    etat($('etatBase'), 'Lecture de ' + f.name + '…');
+    f.arrayBuffer().then(function (buf) {
+      classeur = XLSX.read(new Uint8Array(buf), { type: 'array' });
+      base = NOF27.lireBase(classeur);
+      etat($('etatBase'), 'Base reconnue : ' + f.name, 'ok');
+      resumer();
+    }).catch(function (err) {
+      classeur = base = null;
+      $('blocResume').classList.add('cache');
+      $('blocProduire').classList.add('cache');
+      etat($('etatBase'), err.message, 'err');
+    });
+  }
+
+  /* ---------------------------------------------------- le récapitulatif */
+  function compter(lignes, cle) {
+    var m = {}, ordre = [];
+    lignes.forEach(function (l) {
+      var k = v(l[cle]) || '(non renseigné)';
+      if (!(k in m)) { m[k] = 0; ordre.push(k); }
+      m[k]++;
+    });
+    ordre.sort();
+    return ordre.map(function (k) { return [k, m[k]]; });
+  }
+
+  function tableau(titre, colonne, paires) {
+    var h = '<table><thead><tr><th>' + colonne + '</th><th style="width:7em">Nombre</th>'
+          + '</tr></thead><tbody>';
+    paires.forEach(function (p) {
+      h += '<tr><td>' + echapper(p[0]) + '</td><td class="n">' + p[1] + '</td></tr>';
+    });
+    return '<h3 style="font-size:.95rem;color:var(--encre);margin:18px 0 0">' + titre
+         + '</h3>' + h + '</tbody></table>';
+  }
+
+  function echapper(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
+  function resumer() {
+    var ues = base.feuilles.UE.filter(function (u) { return v(u.ID_UE); });
+    var comps = base.feuilles.Competences_UE;
+    var sansInd = comps.filter(function (c) {
+      return !v(c['Indicateurs du comité au niveau visé']);
+    }).length;
+    var cartes = [
+      [ues.length, 'unités d\'enseignement'],
+      [base.feuilles.EC.length, 'éléments constitutifs'],
+      [comps.length, 'rattachements de composante'],
+      [base.feuilles.Seances.length, 'séances préremplies'],
+      [base.feuilles.MCCC.length, 'épreuves reprises'],
+      [base.feuilles.Annexe_organisation_anterieure.length, 'annexes d\'organisation']
+    ];
+    $('cartes').innerHTML = cartes.map(function (c) {
+      return '<div class="carte"><b>' + c[0] + '</b><span>' + c[1] + '</span></div>';
+    }).join('');
+
+    var h = tableau('Répartition par semestre', 'Semestre', compter(ues, 'Semestre'));
+    h += tableau('Régimes de préremplissage', 'Régime', compter(ues, 'Régime de préremplissage'));
+    h += tableau('Composantes rattachées par bloc', 'Bloc', compter(comps, 'Code_BC'));
+    $('tableaux').innerHTML = h;
+
+    var avis = [];
+    if (sansInd) {
+      avis.push('<p><b>' + sansInd + ' rattachement(s) de composante sans indicateur arrêté par le '
+        + 'comité.</b> Ces composantes figureront tout de même dans les fiches, avec la mention '
+        + 'prévue dans la feuille Ref_Textes, afin que le manque reste visible.</p>');
+    }
+    var rattaches = {};
+    comps.forEach(function (c) { rattaches[v(c.Code_BC)] = true; });
+    var refBlocs = base.feuilles.Ref_Blocs_RNCP || [];
+    var orphelins = refBlocs.map(function (l) { return v(l.Code_BC); })
+      .filter(function (bloc) { return bloc && !rattaches[bloc]; });
+    if (orphelins.length) {
+      avis.push('<p><b>Bloc(s) du référentiel sans aucune composante rattachée :</b> '
+        + orphelins.map(echapper).join(', ')
+        + '. Aucune fiche ne portera de composante de ce bloc.</p>');
+    }
+
+    var ectsHorsNorme = compter(ues, 'Semestre').filter(function (p) {
+      var somme = 0;
+      ues.forEach(function (u) {
+        if ((v(u.Semestre) || '(non renseigné)') === p[0]) somme += Number(u.ECTS) || 0;
+      });
+      return somme !== 30;
+    });
+    if (ectsHorsNorme.length) {
+      avis.push('<p><b>Semestres dont le total d\'ECTS n\'est pas 30 :</b> '
+        + ectsHorsNorme.map(function (p) { return echapper(p[0]); }).join(', ')
+        + '. À vérifier dans la maquette avant diffusion.</p>');
+    }
+    avis.push('<p>Les fiches seront produites à partir de ce classeur et du modèle en vigueur, '
+      + 'sans modifier ni l\'un ni l\'autre.</p>');
+    $('avertissements').innerHTML = avis.join('');
+
+    $('btnTout').textContent = 'Produire les ' + ues.length + ' fiches';
+    $('blocResume').classList.remove('cache');
+    $('blocProduire').classList.remove('cache');
+    $('listeFiches').classList.add('cache');
+    $('actionsZip').style.display = 'none';
+    produites = [];
+  }
+
+  /* ------------------------------------------------------- la production */
+  $('btnTout').addEventListener('click', function () {
+    if (!base) { etat($('etatProd'), 'Choisissez d\'abord le classeur de base.', 'err'); return; }
+    if (!modeleBuf) { etat($('etatProd'), 'Aucun modèle de fiche n\'est chargé.', 'err'); return; }
+    $('btnTout').disabled = true;
+    $('listeFiches').innerHTML = '';
+    $('listeFiches').classList.add('cache');
+    $('actionsZip').style.display = 'none';
+    etat($('etatProd'), 'Production en cours…');
+    NOF27.genererTout(classeur, modeleBuf, function (fait, total, id) {
+      $('jauge').style.width = Math.round(100 * fait / total) + '%';
+      etat($('etatProd'), 'Fiche ' + fait + ' sur ' + total + ' : ' + id);
+    }).then(function (res) {
+      produites = res;
+      afficher(res);
+      etat($('etatProd'), res.length + ' fiches produites. Vous pouvez les télécharger une par une '
+        + 'ou en une seule archive.', 'ok');
+      $('actionsZip').style.display = 'flex';
+      $('btnTout').disabled = false;
+    }).catch(function (err) {
+      $('jauge').style.width = '0';
+      etat($('etatProd'), err.message, 'err');
+      $('btnTout').disabled = false;
+    });
+  });
+
+  function afficher(res) {
+    var ul = $('listeFiches');
+    ul.innerHTML = '';
+    res.forEach(function (f) {
+      var li = document.createElement('li');
+      var code = document.createElement('code');
+      code.textContent = f.id;
+      var lib = document.createElement('span');
+      lib.className = 'lib';
+      lib.textContent = f.nom.replace(/\.docx$/, '');
+      var det = document.createElement('span');
+      det.style.color = 'var(--gris)';
+      det.style.fontSize = '.82rem';
+      det.style.whiteSpace = 'nowrap';
+      det.textContent = f.competences + ' comp., ' + f.seances + ' séances, '
+                      + f.epreuves + ' épr.';
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([f.data],
+        { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }));
+      a.download = f.nom;
+      a.textContent = 'Télécharger';
+      li.appendChild(code); li.appendChild(lib); li.appendChild(det); li.appendChild(a);
+      ul.appendChild(li);
+    });
+    ul.classList.remove('cache');
+  }
+
+  $('btnZip').addEventListener('click', function () {
+    if (!produites.length) return;
+    var btn = $('btnZip');
+    btn.disabled = true;
+    btn.textContent = 'Préparation de l\'archive…';
+    var zip = new JSZip();
+    produites.forEach(function (f) { zip.file(f.nom, f.data); });
+    zip.generateAsync({ type: 'blob' }).then(function (blob) {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Fiches_navette_UE.zip';
+      a.click();
+      btn.disabled = false;
+      btn.textContent = 'Télécharger l\'ensemble, archive .zip';
+    });
+  });
+})();
+</script>
+</body>
+</html>
